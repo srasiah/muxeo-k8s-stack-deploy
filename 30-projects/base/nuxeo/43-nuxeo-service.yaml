@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nuxeo-service
+spec:
+  selector:
+    app: nuxeo-api
+  ports:
+    - protocol: TCP
+      port: 9080 # Service port for Nuxeo web UI
+      targetPort: 8080 # Container port
+      #nodePort: 30004 # Choose an available port (30000-32767 range)
+  type: LoadBalancer # Expose Nuxeo externally

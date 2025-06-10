@@ -1,0 +1,27 @@
+# Node.js
+node_modules/
+dist/
+.env
+
+# Python
+__pycache__/
+*.pyc
+.env
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+
+# IDEs
+.vscode/
+.idea/
+
+# OS-generated files
+Thumbs.db
+
+.env.secret
+.env
+
+04-registry-cred-secret.yaml

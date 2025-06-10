@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mailserver-deployment
+  namespace: mailhog # This Deployment will be in the 'mailhog' namespace
+  labels:
+    app: mailserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mailserver
+  template:
+    metadata:
+      labels:
+        app: mailserver
+    spec:
+      containers:
+      - name: mailserver
+        image: mailhog/mailhog
+        env:
+        - name: MH_STORAGE
+          value: maildir
+        ports:
+        - containerPort: 1025 # SMTP port
+        - containerPort: 8025 # Web UI port
+        volumeMounts:
+        - name: mailhog-data-volume
+          mountPath: /maildir
+      volumes:
+      - name: mailhog-data-volume
+        persistentVolumeClaim:
+          claimName: mailhog-data

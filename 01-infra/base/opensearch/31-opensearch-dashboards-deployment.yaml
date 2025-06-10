@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: opensearch-dashboards-deployment
+  namespace: opensearch
+  labels:
+    app: opensearch-dashboards
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: opensearch-dashboards
+  template:
+    metadata:
+      labels:
+        app: opensearch-dashboards
+    spec:
+      containers:
+      - name: opensearch-dashboards
+        image: opensearchproject/opensearch-dashboards:2.13.0 # Match OpenSearch version
+        ports:
+        - containerPort: 5601 # Default OpenSearch Dashboards port
+        env:
+        - name: OPENSEARCH_HOSTS
+          value: '["http://opensearch-headless:9200"]' # Changed from https to http
+        - name: OPENSEARCH_SSL_VERIFICATION_MODE # Explicitly set SSL verification to none
+          value: "none"
+        - name: SERVER_NAME # Important for external access
+          value: "opensearch-dashboards.local"
+        - name: DISABLE_SECURITY_DASHBOARDS_PLUGIN 
+          value: "true"
+        - name: OPENSEARCH_SECURITY_MULTITENANCY_ENABLED # Attempt to disable multitenancy to bypass tenantinfo error
+          value: "false"
+        
+        # Removed OPENSEARCH_USERNAME and OPENSEARCH_PASSWORD as security plugin is disabled

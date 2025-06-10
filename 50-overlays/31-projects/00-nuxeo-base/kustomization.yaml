@@ -1,0 +1,77 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: nuxeo
+
+resources:
+  - 01-namespace.yaml
+  - ../../../30-projects
+
+configMapGenerator:
+  - name: nuxeo-common-config
+    behavior: merge
+    literals:
+      - KAFKA_BROKERS=kafka-prod.nuxeo.svc.cluster.local:9092
+      - NUXEO_H2_ENABLED=false
+      - NUXEO_CLUSTER_ENABLED=true
+      - NUXEO_CLUSTER_DC=default
+      - NUXEO_S3STORAGE_BUCKET_PREFIX=nuxeo-base/
+      - NUXEO_STREAM_KAFKA_DEFAULT_PREFIX=nuxeo-base-
+      - NUXEO_KAFKA_TOPICPREFIX=nuxeo-base-
+      - NUXEO_ELASTICSEARCH_INDEXPREFIX=nuxeo-base-
+
+secretGenerator:
+  - name: nuxeo-secret
+    envs:
+      - .env.secret
+generatorOptions:
+  disableNameSuffixHash: true
+
+images:
+  - name: docker-private.packages.nuxeo.com/nuxeo/nuxeo
+    newName: user/nuxeo-benchmark
+    newTag: "2023.27-SNAPSHOT"
+
+patches:
+  - target:
+      kind: Deployment
+      name: nuxeo-api-deployment
+    patch: |
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: nuxeo-api-deployment
+      spec:
+        replicas: 1
+        template:
+          spec:
+            containers:
+              - name: nuxeo
+                resources:
+                  requests:
+                    cpu: "500m"
+                    memory: "1Gi"
+                  limits:
+                    cpu: "2"
+                    memory: "2Gi"
+
+  - target:
+      kind: Deployment
+      name: nuxeo-worker-deployment
+    patch: |
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: nuxeo-worker-deployment
+      spec:
+        replicas: 2
+        template:
+          spec:
+            containers:
+              - name: nuxeo-worker
+                resources:
+                  requests:
+                    cpu: "500m"
+                    memory: "1Gi"
+                  limits:
+                    cpu: "2"
+                    memory: "2Gi"

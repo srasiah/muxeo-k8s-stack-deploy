@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nuxeo-config-00-mail
+data:
+  41-mail.conf: |
+    nuxeo.notification.eMailSubjectPrefix="[Nuxeo]"
+    mail.transport.host=mailhog
+    mail.transport.port=1025
+    #mail.transport.auth=
+    #mail.transport.user=
+    #mail.transport.password=
+    #mail.from=
+    #mailservice.user=
+    #mailservice.password=
+    #mail.store.protocol=
+    #mail.transport.protocol=
+    #mail.user=
+    #mail.pop3.host=
+    #mail.debug=

@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: opensearch
+  namespace: opensearch
+spec:
+  selector:
+    matchLabels:
+      app: opensearch
+  serviceName: opensearch-headless # Must match the headless service name
+  replicas: 1 # For simplicity, starting with a single node
+  template:
+    metadata:
+      labels:
+        app: opensearch
+    spec:
+      initContainers: # Added initContainer to set vm.max_map_count
+        - name: increase-vm-max-map-count
+          image: busybox
+          command: ["sysctl", "-w", "vm.max_map_count=262144"]
+          securityContext:
+            privileged: true # Required for sysctl changes
+      containers:
+      - name: opensearch
+        image: opensearchproject/opensearch # Using a recent stable OpenSearch version
+        ports:
+        - containerPort: 9200
+          name: http
+        - containerPort: 9600
+          name: transport
+        env:
+        - name: cluster.name
+          value: "opensearch-cluster"
+        - name: node.name
+          value: "opensearch-node-1" # Unique name for this node
+        - name: discovery.seed_hosts
+          value: "opensearch-headless" # Uses the headless service for discovery
+        - name: cluster.initial_master_nodes
+          value: "opensearch-node-1" # Initial master node for bootstrapping
+        - name: OPENSEARCH_JAVA_OPTS # Recommended to set heap size
+          value: "-Xms512m -Xmx512m" # Adjust based on your node's available memory
+        - name: OPENSEARCH_INITIAL_ADMIN_PASSWORD # Set an initial admin password
+          value: "MyStrongP@ssw0rd!" # Updated to meet complexity requirements
+        - name: DISABLE_SECURITY_PLUGIN # Changed to true to disable security plugin
+          value: "true"
+        volumeMounts:
+        - name: opensearch-data
+          mountPath: "/usr/share/opensearch/data"
+        securityContext: # Removed privileged: true from here, handled by initContainer
+          allowPrivilegeEscalation: false # Good practice to disable if not needed
+          readOnlyRootFilesystem: false
+          runAsNonRoot: true
+          runAsUser: 1000 # Example non-root user, adjust as needed
+          capabilities:
+            drop: ["ALL"]
+      volumes:
+      - name: opensearch-data
+        persistentVolumeClaim:
+          claimName: opensearch-pvc

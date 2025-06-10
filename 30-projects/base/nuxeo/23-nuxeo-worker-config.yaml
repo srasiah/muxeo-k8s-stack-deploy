@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nuxeo-worker-config
+data:
+  NUXEO_RUN_MODE: "worker"
+  NUXEO_DEV: "false"
+  NUXEO_SERVER_HTTP_ENABLED: "false"
+  NUXEO_SERVER_HTTPS_ENABLED: "false"
+
+  # WorkManager using Kafka
+  NUXEO_WORK_ENABLED: "true"
+  NUXEO_WORKMANAGER_IMPLEMENTATION: "stream"
+  NUXEO_STREAM_WORK_ENABLED: "true"
+
+  # Participate in pub-sub
+  NUXEO_STREAM_PUBSUB_ENABLED: "true"
+
+  # Enable bulk processing
+  NUXEO_BULK_ACTION_ENABLED: "true"
+
+  # Runtime patch for headless operation
+  NUXEO_RUNTIME_MP_DIR: "empty"
+
+  # Optional tuning
+  NUXEO.WORKER.THREADS: "4"

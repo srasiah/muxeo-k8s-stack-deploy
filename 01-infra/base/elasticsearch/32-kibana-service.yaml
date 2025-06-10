@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: kibana-service
+  namespace: elasticsearch
+spec:
+  selector:
+    app: kibana
+  ports:
+    - protocol: TCP
+      port: 8095 # Service port
+      targetPort: 5601 # Container port
+      #nodePort: 30003 # Choose an available port (30000-32767 range)
+  type: LoadBalancer # Expose outside the cluster

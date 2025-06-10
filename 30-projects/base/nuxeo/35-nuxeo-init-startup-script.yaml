@@ -1,0 +1,15 @@
+# nuxeo-k8s-base/nuxeo-init-startup-script.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nuxeo-init-startup-script
+data:
+  nuxeo-startup.sh: |
+    #!/bin/bash
+    # INSERT CONTENT OF YOUR docker/init/nuxeo-startup.sh HERE
+    echo "################################################"
+    echo "## Wait for Elasticsearch"
+    echo "################################################"
+    until $(curl --output /dev/null --silent --head --fail http://elasticsearch-headless.elasticsearch.svc.cluster.local:9200); do     printf '.';     sleep 5; done
+    echo "################################################"
+    echo ""

@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: zookeeper
+  namespace: kafka
+spec:
+  selector:
+    matchLabels:
+      app: zookeeper
+  serviceName: zookeeper-headless
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: zookeeper
+    spec:
+      containers:
+        - name: zookeeper
+          image: confluentinc/cp-zookeeper:7.5.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 2181
+              name: client
+            - containerPort: 2888
+              name: peer
+            - containerPort: 3888
+              name: leader-election
+          env:
+            - name: ZOOKEEPER_CLIENT_PORT
+              value: "2181"
+            - name: ZOOKEEPER_TICK_TIME
+              value: "2000"
+            - name: ZOOKEEPER_INIT_LIMIT
+              value: "5"
+            - name: ZOOKEEPER_SYNC_LIMIT
+              value: "2"
+            - name: ZOOKEEPER_SERVER_ID
+              value: "1"
+            - name: ZOOKEEPER_SERVERS
+              value: "zookeeper-0.zookeeper-headless.kafka.svc.cluster.local:2888:3888"
+          volumeMounts:
+            - name: zookeeper-storage
+              mountPath: /var/lib/zookeeper/data
+            - name: zookeeper-logs
+              mountPath: /var/lib/zookeeper/log
+          livenessProbe:
+            tcpSocket:
+              port: 2181
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            tcpSocket:
+              port: 2181
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+      volumes:
+        - name: zookeeper-storage
+          persistentVolumeClaim:
+            claimName: zookeeper-pvc
+        - name: zookeeper-logs
+          emptyDir: {}

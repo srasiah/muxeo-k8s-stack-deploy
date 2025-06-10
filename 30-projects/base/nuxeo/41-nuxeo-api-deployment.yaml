@@ -1,0 +1,167 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nuxeo-api-deployment
+  labels:
+    app: nuxeo-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nuxeo-api
+  template:
+    metadata:
+      labels:
+        app: nuxeo-api
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+    spec:
+      terminationGracePeriodSeconds: 60
+      restartPolicy: Always
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values: ["nuxeo-api"]
+              topologyKey: kubernetes.io/hostname
+      #serviceAccountName: cluster-manager-sa  # Inherits the pull secret 
+      #automountServiceAccountToken: true
+      imagePullSecrets:
+        - name: registry-cred
+      containers:
+        - name: nuxeo
+          image: docker-private.packages.nuxeo.com/nuxeo/nuxeo
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: http
+            - containerPort: 8787
+              name: debug
+            - containerPort: 1089
+              name: jmx
+          env:
+            - name: NUXEO_CLID
+              valueFrom:
+                secretKeyRef:
+                  name: nuxeo-secret
+                  key: clid
+            - name: NUXEO_NODE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: MONGODB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: nuxeo-secret
+                  key: mongodb-username
+            - name: MONGODB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: nuxeo-secret
+                  key: mongodb-password   
+            - name: NUXEO_S3STORAGE_AWSID
+              valueFrom:
+                secretKeyRef:
+                  name: nuxeo-secret
+                  key: aws-accesskey
+            - name: NUXEO_S3STORAGE_AWSSECRET
+              valueFrom:
+                secretKeyRef:
+                  name: nuxeo-secret
+                  key: aws-secretkey                       
+          envFrom:
+            - configMapRef:
+                name: nuxeo-common-config
+            - configMapRef:
+                name: nuxeo-api-config
+          readinessProbe:
+            httpGet:
+              path: /nuxeo/runningstatus
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 10
+          livenessProbe:
+            httpGet:
+              path: /nuxeo/runningstatus
+              port: 8080
+            initialDelaySeconds: 180
+            periodSeconds: 60
+            timeoutSeconds: 5
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /nuxeo/runningstatus
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 30
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "2Gi"
+            limits:
+              cpu: "2"
+              memory: "4Gi"
+          volumeMounts:
+            - name: nuxeo-data-volume
+              mountPath: /var/lib/nuxeo
+            - name: nuxeo-stream-volume
+              mountPath: /opt/nuxeo/server/stream
+            - name: nuxeo-tmp-volume
+              mountPath: /tmp
+            - name: nuxeo-logs-volume
+              mountPath: /var/log/nuxeo
+            - name: nuxeo-import-volume
+              mountPath: /opt/nuxeo/server/import
+            - name: nuxeo-config-00-core
+              mountPath: /etc/nuxeo/conf.d/00-core.conf
+              subPath: 00-core.conf  
+            - name: nuxeo-config-00-system
+              mountPath: /etc/nuxeo/conf.d/00-system.conf
+              subPath: 00-system.conf
+            - name: nuxeo-config-00-mail
+              mountPath: /etc/nuxeo/conf.d/00-mail.conf
+              subPath: 00-mail.conf
+            - name: nuxeo-config-log4j2
+              mountPath: /opt/nuxeo/server/lib/log4j2.xml
+              subPath: log4j2.xml
+            - name: nuxeo-init-startup-script
+              mountPath: /docker-entrypoint-initnuxeo.d/nuxeo-startup.sh
+              subPath: nuxeo-startup.sh
+              readOnly: true
+      volumes:
+        - name: nuxeo-data-volume
+          emptyDir: {}
+        - name: nuxeo-stream-volume
+          emptyDir: {}
+        - name: nuxeo-tmp-volume
+          emptyDir: {}
+        - name: nuxeo-logs-volume
+          emptyDir: {}
+        - name: nuxeo-import-volume
+          emptyDir: {}
+        - name: nuxeo-config-00-core
+          configMap:
+            name: nuxeo-config-00-core          
+        - name: nuxeo-config-00-system
+          configMap:
+            name: nuxeo-config-00-system
+        - name: nuxeo-config-00-mail
+          configMap:
+            name: nuxeo-config-00-mail
+        - name: nuxeo-config-log4j2
+          configMap:
+            name: nuxeo-config-log4j2
+        - name: nuxeo-init-startup-script
+          configMap:
+            name: nuxeo-init-startup-script
+            defaultMode: 0755

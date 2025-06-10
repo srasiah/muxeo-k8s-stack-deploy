@@ -1,0 +1,19 @@
+# mailserver-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: mailserver-service
+  namespace: mailhog # This Service will be in the 'mailhog' namespace
+spec:
+  selector:
+    app: mailserver
+  ports:
+    - protocol: TCP
+      port: 1025 # SMTP service port
+      targetPort: 1025
+      name: smtp # Added name for the SMTP port
+    - protocol: TCP
+      port: 9025 # Web UI service port
+      targetPort: 8025
+      name: http-ui # Added name for the HTTP UI port
+  type: LoadBalancer # Changed to LoadBalancer
