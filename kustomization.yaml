@@ -4,4 +4,4 @@ kind: Kustomization
 
 resources:
 - ./infra/overlays
-- ./applications/overlays
+- ./projects/overlays
