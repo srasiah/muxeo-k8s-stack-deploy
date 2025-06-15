@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nuxeo-common-config
+data:
+  NUXEO_ENVIRONMENT:
+  NUXEO_MONGODB_DBNAME: "nuxeo-base-2023"
+  NUXEO_PROFILES: "s3binaries,mongodb"
+  NUXEO_BLOB_MANAGER: "org.nuxeo.ecm.blob.s3.S3BlobProvider"
+
+  NUXEO_ELASTICSEARCH_ENABLED: "true"
+  NUXEO_ELASTICSEARCH_ADDRESSLIST: "elasticsearch-headless.elasticsearch.svc.cluster.local:9200"
+  NUXEO_ELASTICSEARCH_HTTPONLY_BASEURL: "http://elasticsearch-headless.elasticsearch.svc.cluster.local:9200"
+  NUXEO_ELASTICSEARCH_INDEXPREFIX: "nuxeo-base-"
+
+  # Kafka configuration for all pods
+  NUXEO_KAFKA_ENABLED: "true"
+  NUXEO_KAFKA_TOPICPREFIX: "nuxeo-base-"
+  NUXEO_KAFKA_BOOTSTRAP_SERVERS: "kafka-headless.kafka.svc.cluster.local:9092"
+
+
+  # Stream services via Kafka
+  NUXEO_STREAM_WORK_ENABLED: "true"
+  NUXEO_STREAM_KAFKA_ENABLED: "true"
+  NUXEO_STREAM_KAFKA_DEFAULT_PREFIX: "nuxeo-base-"
+
+  NUXEO_WORK_ENABLED: "true"  
+  NUXEO_WORKMANAGER_IMPLEMENTATION: "stream"
+
+  NUXEO_STREAM_PUBSUB_ENABLED: "true"
+  NUXEO_BULK_ACTION_ENABLED: "true"
+
+
+  JAVA_OPTS: "-XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+
+  # S3 Blob Storage (MinIO)
+  NUXEO_AWS_REGION: "us-east-1"
+  NUXEO_S3STORAGE_BUCKET: "nuxeo-blob-storage"
+  NUXEO_S3STORAGE_BUCKET_PREFIX: "nuxeo-base/"
+  
+  NUXEO_S3STORAGE_ENDPOINT: "http://minio-service.minio.svc.cluster.local:9000"
+  NUXEO_S3STORAGE_PATHSTYLEACCESS: "true"
+  NUXEO_VCS_ENABLED: "false"
+
+
+  # Runtime patch for headless operation
+  NUXEO_RUNTIME_MP_DIR: "empty"
+
+  # Logs
+  ROOT_LOG_LEVEL: ERROR
+  DEV_LOG_LEVEL: ERROR
+
+  # Optional tuning
+  NUXEO.WORKER.THREADS: "4"
+
+
+

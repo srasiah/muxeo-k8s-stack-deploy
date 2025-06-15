@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: config-infra
-data:
-  NUEXO_IMAGE: "docker.nuxeo.com/nuxeo:prod"  # Prod image tag
-  KAFKA_BROKERS: "kafka-prod.nuxeo.svc.cluster.local:9092"

@@ -21,7 +21,10 @@ __pycache__/
 # OS-generated files
 Thumbs.db
 
-.env.secret
+.env.*.secret
 .env
+params.env
 
-04-registry-cred-secret.yaml
+*secret.yaml
+.secrets/
+samples/

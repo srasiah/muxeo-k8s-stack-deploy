@@ -1,0 +1,141 @@
+# 50-overlays/projects/00-nuxeo-base/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: acme-nuxeo
+namePrefix: acme-
+
+resources:
+  - ./01-namespace.yaml
+  - ../../base/nuxeo
+
+secretGenerator:
+  - name: nuxeo-secret
+    envs:
+      - .env.nuxeo.secret
+    behavior: merge
+
+configMapGenerator:
+  - name: nuxeo-common-config
+    behavior: merge
+    literals:
+      - NUXEO_ELASTICSEARCH_ADDRESSLIST=elasticsearch-headless.elasticsearch.svc.cluster.local:9200
+      - NUXEO_ELASTICSEARCH_HTTPONLY_BASEURL=http://elasticsearch-elasticsearch.elasticsearch.svc.cluster.local:9200    
+      - KAFKA_BROKERS=kafka-headless.kafka.svc.cluster.local:9092
+      #- NUXEO_H2_ENABLED=false
+      #- NUXEO_CLUSTER_ENABLED=true
+      #- NUXEO_CLUSTER_DC=default
+      - NUXEO_MONGODB_DBNAME=acme-nuxeo
+      #- NUXEO_BLOB_MANAGER=org.nuxeo.ecm.core.storage.gcp.GoogleStorageBlobProvider
+      #- NUXEO_GCP_CREDENTIALS=/opt/nuxeo/gcp/gcp-credentials.json
+      #- NUXEO_GCP_PROJECT=nuxeo-acme-project
+      #- NUXEO_GCP_STORAGE_BUCKET=nuxeo-blob-storage
+      #- NUXEO_GCP_STORAGE_BUCKET_PREFIX=acme-nuxeo/
+      - NUXEO_STREAM_KAFKA_DEFAULT_PREFIX=acme-nuxeo-
+      - NUXEO_KAFKA_TOPICPREFIX=acme-nuxeo-
+
+      - NUXEO_S3STORAGE_BUCKET=nuxeo-blob-storage
+      - NUXEO_S3STORAGE_BUCKET_PREFIX=acme-nuxeo/
+
+      - NUXEO_ELASTICSEARCH_INDEXPREFIX=acme-nuxeo-
+      - NUXEO_PROFILES="nuxeo-web-ui,amazon-s3-online-storage"
+      - NUXEO_PACKAGES="nuxeo-web-ui amazon-s3-online-storage"
+      - ROOT_LOG_LEVEL=info
+      - DEV_LOG_LEVEL=error
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+images:
+  - name: docker-private.packages.nuxeo.com/nuxeo/nuxeo
+    newName: srasiah/nuxeo-benchmark
+    newTag: "2023.27-SNAPSHOT"
+
+patches:
+  - target:
+      kind: Deployment
+      name: nuxeo-api-deployment
+    patch: |
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: nuxeo-api-deployment
+      spec:
+        replicas: 1
+        template:
+          spec:
+            containers:
+              - name: nuxeo-api
+                ports:
+                - containerPort: 8080
+                  name: http
+                - containerPort: 8787
+                  name: debug
+                - containerPort: 1089
+                  name: jmx
+                readinessProbe:
+                  httpGet:
+                    path: /nuxeo/runningstatus
+                    port: 8080
+                  initialDelaySeconds: 60
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 10
+                livenessProbe:
+                  httpGet:
+                    path: /nuxeo/runningstatus
+                    port: 8080
+                  initialDelaySeconds: 180
+                  periodSeconds: 60
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+                startupProbe:
+                  httpGet:
+                    path: /nuxeo/runningstatus
+                    port: 8080
+                  initialDelaySeconds: 60
+                  periodSeconds: 15
+                  timeoutSeconds: 5
+                  failureThreshold: 30                  
+                resources:
+                  requests:
+                    cpu: "500m"
+                    memory: "1Gi"
+                  limits:
+                    cpu: "2"
+                    memory: "2Gi"                  
+
+          
+  - target:
+      kind: Deployment
+      name: nuxeo-worker-deployment
+    patch: |
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: nuxeo-worker-deployment
+      spec:
+        replicas: 2
+        template:
+          spec:
+            containers:
+              - name: nuxeo-worker
+                resources:
+                  requests:
+                    cpu: "500m"
+                    memory: "1Gi"
+                  limits:
+                    cpu: "2"
+                    memory: "2Gi"
+  - target:
+      kind: Service
+      name: nuxeo-service # Target the Service named 'nuxeo-service'
+    patch: |
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: nuxeo-service
+      spec:
+        ports:
+          - protocol: TCP
+            port: 9080 # Service port for Nuxeo web UI
+            targetPort: 8080 # Container port

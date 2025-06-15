@@ -1,0 +1,34 @@
+# overlays/01-nuxeo-base/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: argo 
+
+#namePrefix: nuxeo-base-
+
+resources:
+- ../../base
+
+configMapGenerator:
+- behavior: merge
+  envs:
+  - params.env
+  name: argo-params-config
+  namespace: argo # Ensure this ConfigMap is in the argo namespace
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+images:
+- name: maven
+  newName: maven
+  newTag: 3.9.6-eclipse-temurin-17
+- name: gcr.io/kaniko-project/executor
+  newName: gcr.io/kaniko-project/executor
+  newTag: latest
+
+# patches:
+# - path: ./01-patch-params.yaml
+#   target:
+#     kind: Workflow
+#     name: maven-kaniko-workflow # Targets the service created by the official install.yaml
+#     namespace: argo   # Ensures the patch applies to the correct namespace

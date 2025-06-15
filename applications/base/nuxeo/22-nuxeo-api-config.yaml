@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nuxeo-api-config
+data:
+  NUXEO_RUN_MODE: "api"
+  NUXEO_DEV: "true"
+  NUXEO_SERVER_HTTP_ENABLED: "true"
+  NUXEO_SERVER_HTTPS_ENABLED: "true"
+
+  # Work processing
+  NUXEO_WORK_PROCESING_ENABLED: "fasle"
+
+  # Enable bulk action submission
+  NUXEO_BULK_ACTION_ENABLED: "true"
+
+  # Optional debug
+  NUXEO_JAVA_OPTS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8787"
+  NUXEO_SELECTION_SELECT_ALL_ENABLED: "true"

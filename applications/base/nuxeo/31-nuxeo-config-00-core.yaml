@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nuxeo-config-00-core
+data:
+  00-core.conf: |
+    # Host Configuration
+    session.timeout=600
+    nuxeo.url=http://localhost:8080/${env:NUXEO_CONTEXT:nuxeo}
+    org.nuxeo.ecm.contextPath=/${env:NUXEO_CONTEXT:nuxeo}
+    nuxeo.force.generation=true
+
+    # MongoDB
+    nuxeo.mongodb.server=mongodb://${env:MONGODB_USERNAME}:${env:MONGODB_PASSWORD}@mongodb-service.mongo.svc.cluster.local:27017
+    nuxeo.mongodb.dbname=${env:NUXEO_MONGODB_DBNAME:nuxeo-base-2023}
+
+    # Binary Manager
+    nuxeo.core.binarymanager=${env:NUXEO_BLOB_MANAGER:org.nuxeo.ecm.core.blob.LocalBlobProvider}
+
+
+    # Elasticsearch
+    elasticsearch.enabled=${env:NUXEO_ELASTICSEARCH_ENABLED:true}
+    elasticsearch.indexName=${env:NUXEO_ELASTICSEARCH_INDEXPREFIX:nuxeo-base-}
+    elasticsearch.client=RestClient
+    elasticsearch.httpEnabled=true
+    elasticsearch.addressList=${env:NUXEO_ELASTICSEARCH_ADDRESSLIST:elasticsearch-headless.elasticsearch.svc.cluster.local:9200}
+    elasticsearch.httpReadOnly.baseUrl=${env:NUXEO_ELASTICSEARCH_HTTPONLY_BASEURL:http://elasticsearch-headless.elasticsearch.svc.cluster.local:9200}
+    elasticsearch.indexNumberOfShards=1
+    elasticsearch.indexNumberOfReplicas=0
+    elasticsearch.restClient.ssl.certificate.verification=false
+    audit.elasticsearch.enabled=true
+    
+
+    # Kafka
+    kafka.enabled=${env:NUXEO_KAFKA_ENABLED:true}
+    kafka.topicPrefix=${env:NUXEO_KAFKA_TOPICPREFIX:nuxeo-base-}
+    kafka.bootstrap.servers=${env:NUXEO_KAFKA_BOOTSTRAP_SERVERS:kafka-headless.kafka.svc.cluster.local:9092}
+
+    # Audit and cluster ID
+    nuxeo.node.id=${env:NUXEO_NODE_ID}
+
+

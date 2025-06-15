@@ -1,0 +1,75 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nuxeo-config-00-system
+data:
+  00-system.conf: |
+    # Templates
+    nuxeo.templates=common,mongodb
+
+
+    # Nuxeo Connect
+    org.nuxeo.connect.url=https://connect.nuxeo.com/nuxeo/site/
+    #org.nuxeo.connect.server.reachable=false
+
+    # CORS
+    nuxeo.cors.urls=*
+
+    # S3 Storage
+    nuxeo.aws.accessKeyId=${env:NUXEO_AWS_ACCESS_KEY_ID}
+    nuxeo.aws.secretKey=${env:NUXEO_AWS_SECRET_ACCESS_KEY}
+    nuxeo.aws.region=${env:NUXEO_AWS_REGION}
+    nuxeo.aws.sessionToken=${env:NUXEO_AWS_SESSION_TOKEN}
+
+    nuxeo.s3storage.endpoint=${env:NUXEO_S3STORAGE_ENDPOINT}
+    nuxeo.s3storage.bucket=${env:NUXEO_S3STORAGE_BUCKET}
+    nuxeo.s3storage.bucket_prefix=${env:NUXEO_S3STORAGE_BUCKET_PREFIX}
+    nuxeo.s3storage.pathstyleaccess=${env:NUXEO_S3STORAGE_PATHSTYLEACCESS:false}
+
+    # GCP
+    nuxeo.gcp.credentials=${env:NUXEO_GCP_CREDENTIALS}
+    nuxeo.gcp.project=${env:NUXEO_GCP_PROJECT}
+    nuxeo.gcp.storage.bucket=${env:NUXEO_GCP_STORAGE_BUCKET}
+    nuxeo.gcp.storage.bucket_prefix=${env:NUXEO_GCP_STORAGE_BUCKET_PREFIX}
+
+   
+    # Streams (Kafka-based only)
+    nuxeo.stream.kafka.enabled=${env:NUXEO_STREAM_WORK_ENABLED:false}
+    nuxeo.stream.kafka.default.prefix=${env:NUXEO_STREAM_KAFKA_DEFAULT_PREFIX:nuxeo-base-}
+    nuxeo.stream.kafka.default.bootstrap.servers=${env:NUXEO_STREAM_KAFKA_DEFAULT_BOOTSTRAP_SERVERS:kafka-headless.kafka.svc.cluster.local:9092}
+    nuxeo.stream.work.enabled=${env:NUXEO_STREAM_WORK_ENABLED:false}
+    nuxeo.stream.work.log.codec=avro
+    nuxeo.stream.audit.log.codec=avro
+    nuxeo.stream.pubsub.log.codec=avro
+
+    # Work
+    nuxeo.work.processing.enabled=${env:NUXEO_WORK_PROCESING_ENABLED:false}
+    nuxeo.work.queue.common.enabled=${env:NUXEO_STREAM_WORK_ENABLED:false}
+
+    #nuxeo.work.queue.raclupdate.enabled=true
+    #nuxeo.work.queue.common.threads=2
+    #nuxeo.work.queue.thumbnail.enabled=true
+    #nuxeo.work.queue.thumbnail.threads=2
+
+    # Bulk
+    nuxeo.bulk.action.recomputeThumbnails.maxRetries=1
+    nuxeo.bulk.action.recomputeViews.maxRetries=1
+    nuxeo.bulk.action.recomputeVideoConversions.maxRetries=1
+
+    # Metrics
+    metrics.enabled=true
+    metrics.jvm.enabled=true
+    metrics.log4j.enabled=true
+    metrics.tomcat.enabled=true
+    metrics.streams.enabled=true
+
+    # Enable "select all" by default
+    nuxeo.selection.selectAllEnabled=${env:NUXEO_SELECTION_SELECT_ALL_ENABLED:true}
+
+    # Hotreload
+    org.nuxeo.dev={env:NUXEO_DEV:true}
+
+    # JAVA
+    JAVA_OPTS=-XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50 -Dfile.encoding=UTF-8
+
+

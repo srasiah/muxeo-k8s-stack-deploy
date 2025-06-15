@@ -2,46 +2,6 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-# List all your component bases here
 resources:
-- ./infra
-- ./tenants # Path to your Kafka Kustomize base directory
-
-images:
-- name: docker.elastic.co/elasticsearch/elasticsearch
-  newName: docker.elastic.co/elasticsearch/elasticsearch
-  newTag: 8.13.0  
-- name: docker.elastic.co/kibana/kibana # Match Elasticsearch version
-  newName: docker.elastic.co/kibana/kibana
-  newTag: 8.13.0   
-- name: confluentinc/cp-kafka
-  newName: confluentinc/cp-kafka
-  newTag: 7.5.0 
-- name: dprovectuslabs/kafka-ui
-  newName: dprovectuslabs/kafka-ui
-  newTag: latest   
-- name: confluentinc/cp-zookeeper
-  newName: confluentinc/cp-zookeeper
-  newTag: 7.5.0   
-- name: mailhog/mailhog  # This matches whatever image name is in your deployment.yaml
-  newName: mailhog/mailhog  # Or your custom registry path
-  newTag: latest  # Or a specific version like v1.0.1    
-- name: mongo
-  newName: mongo
-  newTag: 8.0.10
-- name: mongo-express
-  newName: mongo-express
-  newTag: 1.0.2    
-- name: opensearchproject/opensearch
-  newName: opensearchproject/opensearch
-  newTag: 2.13.0
-- name: opensearchproject/opensearch-dashboards # Match OpenSearch version
-  newName: opensearch-dashboards
-  newTag: 2.13.0     
-- name: quay.io/minio/minio
-  newName: minio/minio
-  newTag: "RELEASE.2025-05-24T17-08-30Z"
-
-- name: docker-private.packages.nuxeo.com/nuxeo/nuxeo
-  newName: srasiah/nuxeo-base
-  newTag: "2023.27" #2023.27-amd64
+- ./infra/overlays
+- ./applications/overlays

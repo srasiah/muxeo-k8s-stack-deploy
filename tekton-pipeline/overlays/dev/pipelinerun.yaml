@@ -1,0 +1,46 @@
+# my-tekton-project/overlays/dev/pipelinerun.yaml
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: maven-ci-run-dev
+  # Kustomize will add '-dev' suffix to the name, so it becomes maven-ci-run-dev-dev, if you want only -dev you might use namePrefix and rename this file/name.
+  # Alternatively, just use a unique name that doesn't get suffixed automatically.
+spec:
+  pipelineRef:
+    name: maven-ci-pipeline # References the base pipeline. Kustomize's nameSuffix will apply here.
+  serviceAccountName: default # Or the name of your service account if it's named differently (e.g., pipeline-sa-dev)
+
+  # Define parameters for this specific run
+  params:
+    - name: branch
+      value: "dev-branch" # This will override the default in the Pipeline
+    - name: repo_org
+      value: "srasiah"
+    - name: repo_name
+      value: "nuxeo-2023"
+    - name: docker_registry
+      value: "docker.io/srasiah"
+    - name: image_name
+      value: "nuxeo-base"
+    - name: tag
+      value: "2023.27-SNAPSHOT"
+    - name: mvn_goals
+      value: "install -Pdistrib,docker -pl docker/nuxeo -am -B -DskipTests -Dnuxeo.skip.enforcer=true -T6 -Ddocker.skip=true"
+    - name: mvn_props
+      value: "-Denv=staging -DskipTests=false -Ddocker.base.image=2023.27-SNAPSHOT -Ddocker.platforms=linux/amd64"
+
+  # Define workspace bindings for this specific run
+  workspaces:
+    - name: shared-data
+      volumeClaimTemplate: # This creates a new PVC for each run, ensuring clean workspace
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 1Gi
+    - name: maven-cache
+      persistentVolumeClaim: # Reference the existing Maven cache PVC by its static name
+        claimName: maven-cache-pvc # This name should be consistent across all your PipelineRuns if you want to share the cache
+                                  # Kustomize's nameSuffix will apply to the PVC if it's managed by base/resources
+                                  # Make sure your base/resources/maven-cache-pvc.yaml name is 'maven-cache-pvc'
+                                  # and it's not subject to nameSuffix in overlays if you want a single global cache.

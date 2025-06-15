@@ -1,0 +1,27 @@
+# kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Resources to be applied in the 'argo' namespace
+resources:
+  - ./01-argo-rbac-workflow-executor.yaml # Your custom RBAC for workflows
+  - ./02-registry-cred-secret.yaml      # Your Docker registry secret
+  - ./05-maven-kaniko-workflow.yaml     # Your Maven Kaniko workflow definition
+
+# Patch the existing argo-server Service to expose it as LoadBalancer
+patches:
+- path: ./04-argo-server-service-patch.yaml
+  target:
+    kind: Service
+    name: argo-server # Targets the service created by the official install.yaml
+    namespace: argo   # Ensures the patch applies to the correct namespace
+
+# Optional: If you want to use a ConfigMap for workflow parameters
+configMapGenerator:
+  - name: argo-params-config
+    envs:
+      - params.env
+    namespace: argo # Ensure this ConfigMap is in the argo namespace
+
+generatorOptions:
+  disableNameSuffixHash: true # Keeps resource names predictable

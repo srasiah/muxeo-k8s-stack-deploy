@@ -1,0 +1,26 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- ./01-nuxeo-pvc.yaml
+- ./02-nuxeo-worker-pvc.yaml
+- ./04-registry-cred-secret.yaml
+- ./02-gcp-secret.yaml
+- ./21-nuxeo-common-config.yaml
+- ./22-nuxeo-api-config.yaml
+- ./23-nuxeo-worker-config.yaml
+- ./31-nuxeo-config-00-core.yaml
+- ./32-nuxeo-config-00-system.yaml
+- ./33-nuxeo-config-00-mail.yaml
+- ./34-nuxeo-config-log4j2.yaml
+- ./35-nuxeo-init-startup-script.yaml
+- ./41-nuxeo-api-deployment.yaml
+- ./42-nuxeo-worker-deployment.yaml
+- ./43-nuxeo-service.yaml
+
+secretGenerator:
+  - name: nuxeo-secret
+    envs:
+      - .env.nuxeo.secret
+      
+generatorOptions:
+  disableNameSuffixHash: true

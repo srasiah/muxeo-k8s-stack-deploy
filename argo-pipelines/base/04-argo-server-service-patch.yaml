@@ -1,0 +1,9 @@
+# 04-argo-server-service-patch.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: argo-server # Name of the service deployed by official install.yaml
+  namespace: argo # Important: Namespace of the existing service
+spec:
+  type: LoadBalancer # Change the service type to LoadBalancer
+

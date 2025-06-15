@@ -1,0 +1,13 @@
+# my-tekton-project/base/resources/maven-cache-pvc.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: maven-cache-pvc # Fixed name for the shared Maven cache
+  namespace: argo
+spec:
+  accessModes:
+    - ReadWriteOnce # Requires a StorageClass that supports ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi # Allocate 5GB for the Maven cache. Adjust as needed.
+  # storageClassName: "your-storage-class-name" # Uncomment and specify if you don't have a default SC

@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nuxeo-worker-config
+data:
+  NUXEO_RUN_MODE: "worker"
+  NUXEO_DEV: "false"
+  NUXEO_SERVER_HTTP_ENABLED: "false"
+  NUXEO_SERVER_HTTPS_ENABLED: "false"
+
+  # Work processing
+  NUXEO_WORK_PROCESING_ENABLED: "true"
