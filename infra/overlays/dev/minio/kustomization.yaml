@@ -1,0 +1,8 @@
+# infra/overlays/dev/minio/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../../base/minio # Reference the generated base manifests
+
+namespace: minio # Ensure all resources are in the 'minio' namespace

@@ -1,0 +1,8 @@
+# infra/overlays/dev/elasticsearch/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../../base/elasticsearch # Reference the generated base manifests
+
+namespace: elasticsearch # Ensure all resources are in the 'elasticsearch' namespace

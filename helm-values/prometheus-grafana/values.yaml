@@ -1,0 +1,37 @@
+grafana:
+  adminPassword: admin
+  service:
+    type: LoadBalancer
+    ports:
+      - port: 80
+        targetPort: 3000
+        protocol: TCP
+  persistence:
+    enabled: true
+    storageClassName: standard
+    accessModes:
+      - ReadWriteOnce
+    size: 1Gi
+
+prometheus:
+  prometheusSpec:
+    retention: 15d  # ⬅️ Set retention duration here
+    retentionSize: 10GB  # ⬅️ (optional) Max disk size before old data is deleted
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: standard
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 5Gi
+    serviceMonitorSelectorNilUsesHelmValues: false
+  additionalPrometheusRulesMap:
+    example-rule:
+      groups:
+        - name: node.rules
+          rules:
+            - record: instance:node_cpu:rate5m
+              expr: rate(node_cpu_seconds_total[5m])
+              labels:
+                severity: critical
