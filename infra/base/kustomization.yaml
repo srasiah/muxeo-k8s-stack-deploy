@@ -7,4 +7,6 @@ resources:
   - mongo/
   - minio/
   - mailhog/
+  - monitoring/
+
 

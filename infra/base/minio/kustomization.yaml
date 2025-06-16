@@ -5,7 +5,6 @@ namespace: minio
 resources:
   - 01-namespace.yaml
   - 02-pvc.yaml
-  #- 03-minio-secret.yaml
   - 04-deployment.yaml
   - 05-service-clusterip.yaml
   - 06-service-loadbalancer.yaml

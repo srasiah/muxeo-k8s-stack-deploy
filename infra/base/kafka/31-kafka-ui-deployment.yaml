@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: kafka-ui-deployment
-  namespace: kafka
   labels:
     app: kafka-ui
 spec:

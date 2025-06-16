@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: monitoring
+
+resources:
+  - kafka-exporter-servicemonitor.yaml
+
+configMapGenerator:
+  - name: grafana-dashboards
+    files:
+      - config/nuxeo.json
+      - config/kafka.json
+    #behavior: merge
+generatorOptions:
+  disableNameSuffixHash: true
+

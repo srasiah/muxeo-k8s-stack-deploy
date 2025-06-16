@@ -1,11 +1,13 @@
 grafana:
   adminPassword: admin
+
   service:
     type: LoadBalancer
     ports:
       - port: 80
         targetPort: 3000
         protocol: TCP
+
   persistence:
     enabled: true
     storageClassName: standard
@@ -13,10 +15,31 @@ grafana:
       - ReadWriteOnce
     size: 1Gi
 
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+        - name: 'default'
+          orgId: 1
+          folder: 'Provisioned'
+          type: file
+          disableDeletion: false
+          editable: true
+          options:
+            path: /var/lib/grafana/dashboards
+
+  extraConfigmapMounts:
+    - name: grafana-dashboards
+      mountPath: /var/lib/grafana/dashboards
+      configMap: grafana-dashboards
+      readOnly: true
+      defaultMode: 0444
+
 prometheus:
   prometheusSpec:
-    retention: 15d  # ⬅️ Set retention duration here
-    retentionSize: 10GB  # ⬅️ (optional) Max disk size before old data is deleted
+    retention: 15d
+    retentionSize: 10GB
+    serviceMonitorSelectorNilUsesHelmValues: true  # <-- fix is here!
     storageSpec:
       volumeClaimTemplate:
         spec:
@@ -25,7 +48,8 @@ prometheus:
           resources:
             requests:
               storage: 5Gi
-    serviceMonitorSelectorNilUsesHelmValues: false
+
+
   additionalPrometheusRulesMap:
     example-rule:
       groups:

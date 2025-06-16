@@ -1,16 +1,18 @@
 #!/bin/bash
-
 set -euo pipefail
 
 HELM_RELEASE="kube-monitoring"
 NAMESPACE="monitoring"
 VALUES_FILE="helm-values/prometheus-grafana/values.yaml"
+DASHBOARD_DIR="helm-values/grafana/dashboards"
+KAFKA_SERVER="PLAINTEXT://kafka-headless.kafka.svc.cluster.local:9092"
 
 usage() {
-  echo "Usage: $0 [install|upgrade|help]"
-  echo "  install    Install kube-prometheus-stack"
-  echo "  upgrade    Upgrade kube-prometheus-stack"
-  echo "  help       Show this help message"
+  echo "Usage: $0 [install|upgrade|dashboards|help]"
+  echo "  install     Install kube-prometheus-stack + kafka-exporter"
+  echo "  upgrade     Upgrade kube-prometheus-stack + kafka-exporter"
+  echo "  dashboards  Update Grafana dashboards from JSON files"
+  echo "  help        Show this help message"
   exit 1
 }
 
@@ -34,6 +36,11 @@ install_stack() {
     --namespace "$NAMESPACE" \
     --create-namespace \
     -f "$VALUES_FILE"
+
+  echo "📦 Installing kafka-exporter..."
+  helm install kafka-exporter prometheus-community/prometheus-kafka-exporter \
+    --namespace "$NAMESPACE" \
+    --set kafka.server="$KAFKA_SERVER"
 }
 
 upgrade_stack() {
@@ -45,6 +52,30 @@ upgrade_stack() {
   helm upgrade "$HELM_RELEASE" prometheus-community/kube-prometheus-stack \
     --namespace "$NAMESPACE" \
     -f "$VALUES_FILE"
+
+  echo "⬆️ Upgrading kafka-exporter..."
+  helm upgrade kafka-exporter prometheus-community/prometheus-kafka-exporter \
+    --namespace "$NAMESPACE" \
+    --set kafka.server="$KAFKA_SERVER"
+}
+
+update_dashboards() {
+  echo "📁 Rebuilding Grafana dashboards from: $DASHBOARD_DIR"
+
+  if [ ! -d "$DASHBOARD_DIR" ]; then
+    echo "❌ Dashboard directory '$DASHBOARD_DIR' not found."
+    exit 1
+  fi
+
+  kubectl create configmap grafana-dashboards \
+    --from-file="$DASHBOARD_DIR" \
+    --namespace "$NAMESPACE" \
+    --dry-run=client -o yaml | kubectl apply -f -
+
+  echo "♻️ Restarting Grafana to reload dashboards..."
+  kubectl rollout restart deployment "$HELM_RELEASE-grafana" -n "$NAMESPACE"
+
+  echo "✅ Dashboards updated and Grafana restarted."
 }
 
 show_status() {
@@ -77,6 +108,9 @@ case "$1" in
   upgrade)
     upgrade_stack
     show_status
+    ;;
+  dashboards)
+    update_dashboards
     ;;
   help|--help|-h)
     usage

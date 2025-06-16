@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sftp-server
+  namespace: sftp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sftp-server
+  template:
+    metadata:
+      labels:
+        app: sftp-server
+    spec:
+      containers:
+        - name: sftp
+          image: atmoz/sftp
+          env:
+            - name: SFTP_USER
+              valueFrom:
+                secretKeyRef:
+                  name: sftp-credentials
+                  key: sftp-user
+            - name: SFTP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: sftp-credentials
+                  key: sftp-password
+            - name: SFTP_FOLDER
+              valueFrom:
+                configMapKeyRef:
+                  name: sftp-config
+                  key: SFTP_FOLDER
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              user_line="${SFTP_USER}:${SFTP_PASSWORD}:::${SFTP_FOLDER}" && \
+              echo "Starting with: $user_line" && \
+              /entrypoint "$user_line"
+          volumeMounts:
+            - name: sftp-data
+              mountPath: /home
+      volumes:
+        - name: sftp-data
+          persistentVolumeClaim:
+            claimName: sftp-data-pvc

@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: mailserver-deployment
-  namespace: mailhog # This Deployment will be in the 'mailhog' namespace
   labels:
     app: mailserver
 spec:

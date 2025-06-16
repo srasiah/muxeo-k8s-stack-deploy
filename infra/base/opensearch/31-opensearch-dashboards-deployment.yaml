@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: opensearch-dashboards-deployment
-  namespace: opensearch
   labels:
     app: opensearch-dashboards
 spec:

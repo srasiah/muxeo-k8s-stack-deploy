@@ -8,6 +8,8 @@ resources:
 - mongo/
 - minio/
 - mailhog/
+- monitoring/
+- sftp/
 
 images:
 - name: docker.elastic.co/elasticsearch/elasticsearch
