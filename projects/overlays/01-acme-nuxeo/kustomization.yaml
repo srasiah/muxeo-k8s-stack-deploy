@@ -6,6 +6,7 @@ namePrefix: acme-
 
 resources:
   - ./01-namespace.yaml
+ # - ../registry-cred-secret.yaml
   - ../../base/nuxeo
 
 secretGenerator:
@@ -24,7 +25,11 @@ configMapGenerator:
       #- NUXEO_H2_ENABLED=false
       #- NUXEO_CLUSTER_ENABLED=true
       #- NUXEO_CLUSTER_DC=default
-      - NUXEO_MONGODB_DBNAME=acme-nuxeo
+
+      #- NUXEO_S3STORAGE_BUCKET=nuxeo-blob-storage
+      #- NUXEO_S3STORAGE_BUCKET_PREFIX=nuxeo-base/
+      #- NUXEO_MONGODB_DBNAME=acme-nuxeo
+
       #- NUXEO_BLOB_MANAGER=org.nuxeo.ecm.core.storage.gcp.GoogleStorageBlobProvider
       #- NUXEO_GCP_CREDENTIALS=/opt/nuxeo/gcp/gcp-credentials.json
       #- NUXEO_GCP_PROJECT=nuxeo-acme-project
@@ -52,6 +57,17 @@ images:
 
 patches:
   - target:
+      kind: ServiceAccount
+      name: default
+    patch: |
+      apiVersion: v1
+      kind: ServiceAccount
+      metadata:
+        name: default
+      imagePullSecrets:
+        - name: registry-cred
+        
+  - target:
       kind: Deployment
       name: nuxeo-api-deployment
     patch: |
@@ -64,47 +80,14 @@ patches:
         template:
           spec:
             containers:
-              - name: nuxeo-api
-                ports:
-                - containerPort: 8080
-                  name: http
-                - containerPort: 8787
-                  name: debug
-                - containerPort: 1089
-                  name: jmx
-                readinessProbe:
-                  httpGet:
-                    path: /nuxeo/runningstatus
-                    port: 8080
-                  initialDelaySeconds: 60
-                  periodSeconds: 10
-                  timeoutSeconds: 5
-                  failureThreshold: 10
-                livenessProbe:
-                  httpGet:
-                    path: /nuxeo/runningstatus
-                    port: 8080
-                  initialDelaySeconds: 180
-                  periodSeconds: 60
-                  timeoutSeconds: 5
-                  failureThreshold: 3
-                startupProbe:
-                  httpGet:
-                    path: /nuxeo/runningstatus
-                    port: 8080
-                  initialDelaySeconds: 60
-                  periodSeconds: 15
-                  timeoutSeconds: 5
-                  failureThreshold: 30                  
+              - name: nuxeo-api     
                 resources:
                   requests:
                     cpu: "500m"
                     memory: "1Gi"
                   limits:
                     cpu: "2"
-                    memory: "2Gi"                  
-
-          
+                    memory: "2Gi"                          
   - target:
       kind: Deployment
       name: nuxeo-worker-deployment

@@ -12,7 +12,7 @@ spec:
       targetPort: 1025
       name: smtp # Added name for the SMTP port
     - protocol: TCP
-      port: 9025 # Web UI service port
+      port: 8096 # Web UI service port
       targetPort: 8025
       name: http-ui # Added name for the HTTP UI port
   type: LoadBalancer # Changed to LoadBalancer

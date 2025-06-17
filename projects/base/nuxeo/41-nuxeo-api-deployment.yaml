@@ -34,7 +34,7 @@ spec:
       #serviceAccountName: cluster-wide-reader-sa  # Inherits the pull secret 
       #automountServiceAccountToken: true
       imagePullSecrets:
-        - name: registry-secret
+        - name: registry-cred
       containers:
         - name: nuxeo-api
           image: docker-private.packages.nuxeo.com/nuxeo/nuxeo

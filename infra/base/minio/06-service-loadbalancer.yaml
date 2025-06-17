@@ -11,6 +11,6 @@ spec:
       port: 9000
       targetPort: 9000
     - name: web-ui
-      port: 9001
+      port: 8091
       targetPort: 9001
 

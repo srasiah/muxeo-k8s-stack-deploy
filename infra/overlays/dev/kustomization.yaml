@@ -8,7 +8,7 @@ resources:
 - mongo/
 - minio/
 - mailhog/
-- monitoring/
+#- monitoring/
 - sftp/
 
 images:

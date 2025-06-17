@@ -1,8 +1,11 @@
 # infra/overlays/dev/kafka/kustomization.yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+namespace: kafka # Ensure all resources are in the 'kafka' namespace
+
 
 resources:
   - ../../../base/kafka # Reference the generated base manifests
+  #- 33-kibana-ingress.yaml
 
-namespace: kafka # Ensure all resources are in the 'kafka' namespace
+
