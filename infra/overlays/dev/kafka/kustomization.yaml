@@ -6,6 +6,4 @@ namespace: kafka # Ensure all resources are in the 'kafka' namespace
 
 resources:
   - ../../../base/kafka # Reference the generated base manifests
-  #- 33-kibana-ingress.yaml
-
-
+  - 41-kafka-ui-ingress.yaml

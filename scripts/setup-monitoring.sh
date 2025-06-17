@@ -38,9 +38,11 @@ ensure_metrics_server() {
       --type=json \
       -p='[{"op":"add","path":"/spec/template/spec/containers/0/args/-","value":"--kubelet-insecure-tls"}]' || {
       echo "⚠️ Failed to patch metrics-server, continuing...";
+      kubectl rollout status deployment metrics-server -n kube-system
     }
   fi
 }
+
 
 install_stack() {
   echo "🚀 Installing kube-prometheus-stack..."

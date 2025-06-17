@@ -4,5 +4,6 @@ kind: Kustomization
 
 resources:
   - ../../../base/minio # Reference the generated base manifests
+  - 41-minio-ui-ingress.yaml
 
 namespace: minio # Ensure all resources are in the 'minio' namespace

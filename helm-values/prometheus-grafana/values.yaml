@@ -1,16 +1,25 @@
 grafana:
-  # Admin password (change to a secure value or use a secret)
-  adminPassword: admin  # TODO: Replace with a secure password or reference a secret
+  adminPassword: admin
   service:
     type: LoadBalancer
-    port: 8097  # Maps to Grafana's container port 3000
+    port: 8097
+  # ingress:
+  #   enabled: true
+  #   annotations:
+  #     nginx.ingress.kubernetes.io/rewrite-target: /
+  #     nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+  #   hosts:
+  #     - host: grafana.docker.local
+  #       paths:
+  #         - path: /
+  #           pathType: Prefix
+    # tls: []  # Optionally configure TLS here
   persistence:
     enabled: true
-    storageClassName: standard  # Verify 'standard' exists in your cluster (kubectl get storageclass)
+    storageClassName: standard
     accessModes:
       - ReadWriteOnce
     size: 1Gi
-  # Resource limits for Grafana
   resources:
     limits:
       cpu: 500m
@@ -18,7 +27,6 @@ grafana:
     requests:
       cpu: 100m
       memory: 128Mi
-  # Dashboard provider configuration
   dashboardProviders:
     dashboardproviders.yaml:
       apiVersion: 1
@@ -31,27 +39,24 @@ grafana:
           editable: true
           options:
             path: /var/lib/grafana/dashboards
-  # Enable sidecar to load dashboards from ConfigMap
   sidecar:
     dashboards:
       enabled: true
       label: grafana_dashboard
-      searchNamespace: monitoring  # Matches the namespace in the script
+      searchNamespace: monitoring
 
 prometheus:
   prometheusSpec:
-    retention: 15d  # Retains data for 15 days
-    # Note: retentionSize is not supported by Prometheus; rely on retention and PVC size
-    serviceMonitorSelectorNilUsesHelmValues: true  # Ensures ServiceMonitors from chart are scraped
+    retention: 15d
+    serviceMonitorSelectorNilUsesHelmValues: true
     storageSpec:
       volumeClaimTemplate:
         spec:
-          storageClassName: standard  # Verify 'standard' exists in your cluster
+          storageClassName: standard
           accessModes: ["ReadWriteOnce"]
           resources:
             requests:
               storage: 5Gi
-    # Resource limits for Prometheus
     resources:
       limits:
         cpu: 1000m
@@ -59,7 +64,6 @@ prometheus:
       requests:
         cpu: 500m
         memory: 1Gi
-  # Additional Prometheus rules (assumes node_exporter is enabled)
   additionalPrometheusRulesMap:
     example-rule:
       groups:

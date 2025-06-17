@@ -4,5 +4,6 @@ kind: Kustomization
 
 resources:
   - ../../../base/mongo # Reference the generated base manifests
+  - 41-mongo-express-ingress.yaml
 
 namespace: mongo # Ensure all resources are in the 'mongo' namespace

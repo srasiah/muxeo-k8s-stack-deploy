@@ -8,6 +8,7 @@ resources:
   - ./01-namespace.yaml
  # - ../registry-cred-secret.yaml
   - ../../base/nuxeo
+  - 41-nuxeo-ingress.yaml
 
 secretGenerator:
   - name: nuxeo-secret
