@@ -118,13 +118,13 @@ show_status() {
   echo "📊 Grafana pod usage:"
   kubectl top pods -n "$NAMESPACE" 2>/dev/null | grep grafana || echo "⚠️ Grafana pods not found or metrics-server not ready."
 
-  echo
-  echo "🔧 Metrics server args:"
-  if kubectl get deployment metrics-server -n kube-system >/dev/null 2>&1; then
-    kubectl get deployment metrics-server -n kube-system -o=jsonpath="{.spec.template.spec.containers[0].args}" 2>/dev/null || echo "⚠️ Metrics server not found."
-  else
-    echo "⚠️ Metrics server not found."
-  fi
+  # echo
+  # echo "🔧 Metrics server args:"
+  # if kubectl get deployment metrics-server -n kube-system >/dev/null 2>&1; then
+  #   kubectl get deployment metrics-server -n kube-system -o=jsonpath="{.spec.template.spec.containers[0].args}" 2>/dev/null || echo "⚠️ Metrics server not found."
+  # else
+  #   echo "⚠️ Metrics server not found."
+  # fi
   echo
 }
 
@@ -136,7 +136,7 @@ check_prerequisites
 case "$1" in
   install)
     install_stack
-    ensure_metrics_server
+    #ensure_metrics_server
     show_status
     ;;
   upgrade)
